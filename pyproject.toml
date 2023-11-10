@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "drf-xml-serializers"
+version = "0.1.0"
+description = ""
+authors = ["motherwort <32970725+motherwort@users.noreply.github.com>"]
+packages = [{include = "drf_xml_serializers"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Django = "^4.0.1"
+djangorestframework = "^3.13.1"
+lxml = "^4.9.3"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
