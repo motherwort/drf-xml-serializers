@@ -98,7 +98,7 @@ def test_boolean_field():
     assert data is True
 
 
-def test_char_field(pytest_configure):
+def test_char_field():
     field = fields.CharXPathField(xpath="/Товар/Наименование", allow_blank=True)
     value = field.get_value(xml)
     data = field.run_validation(value)
@@ -106,7 +106,7 @@ def test_char_field(pytest_configure):
     assert data == "Кофе"
 
 
-def test_uuid_field(pytest_configure):
+def test_uuid_field():
     field = fields.UUIDXPathField(xpath="/Товар/Ид")
     value = field.get_value(xml)
     data = field.run_validation(value)

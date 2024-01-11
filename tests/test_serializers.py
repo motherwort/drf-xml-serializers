@@ -1,12 +1,8 @@
 from uuid import UUID
 
 import lxml.objectify
-from django.conf import settings
 
 from drf_xml_serializers import serializers
-
-settings.configure()
-settings.USE_I18N = False
 
 xml = lxml.objectify.fromstring(
     """<?xml version="1.0" encoding="UTF-8"?>
