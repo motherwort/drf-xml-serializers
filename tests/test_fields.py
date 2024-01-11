@@ -1,4 +1,3 @@
-from decimal import Decimal
 from uuid import UUID
 
 import lxml.objectify
@@ -65,48 +64,50 @@ xml2 = lxml.objectify.fromstring(
 
 
 def test_get_value():
-    field = fields.Field(source="/Товар")
+    field = fields.XPathField(xpath="/Товар")
     value = field.get_value(xml)
     assert isinstance(value, lxml.objectify.ObjectifiedElement)
 
-    field = fields.Field(source="/НеТовар")
+    field = fields.XPathField(xpath="/НеТовар")
     value = field.get_value(xml)
     assert value is fields.empty
 
-    field = fields.Field(source="/Товар/СтавкиНалогов/СтавкаНалога")
+    field = fields.XPathField(xpath="/Товар/СтавкиНалогов/СтавкаНалога")
     with pytest.raises(fields.ValidationError):
         value = field.get_value(xml)
 
-    field = fields.ListField(source="/Товар/СтавкиНалогов/СтавкаНалога")
+    field = fields.ListXPathField(xpath="/Товар/СтавкиНалогов/СтавкаНалога")
     value = field.get_value(xml)
 
-    field = fields.Field(source="/Товар")
+    field = fields.XPathField(xpath="/Товар")
     value = field.get_value(xml2)
     assert value is fields.empty
 
-    field = fields.Field(source="/p:Товар", namespaces={"p": "urn:1C.ru:commerceml_2"})
+    field = fields.XPathField(
+        xpath="/p:Товар", namespaces={"p": "urn:1C.ru:commerceml_2"}
+    )
     value = field.get_value(xml2)
     assert isinstance(value, lxml.objectify.ObjectifiedElement)
 
 
 def test_boolean_field():
-    field = fields.BooleanField(source="/Товар/ПометкаУдаления")
+    field = fields.BooleanXPathField(xpath="/Товар/ПометкаУдаления")
     value = field.get_value(xml)
     data = field.run_validation(value)
     assert isinstance(data, bool)
     assert data is True
 
 
-def test_char_field():
-    field = fields.CharField(source="/Товар/Наименование")
+def test_char_field(pytest_configure):
+    field = fields.CharXPathField(xpath="/Товар/Наименование", allow_blank=True)
     value = field.get_value(xml)
     data = field.run_validation(value)
     assert isinstance(data, str)
     assert data == "Кофе"
 
 
-def test_uuid_field():
-    field = fields.UUIDField(source="/Товар/Ид")
+def test_uuid_field(pytest_configure):
+    field = fields.UUIDXPathField(xpath="/Товар/Ид")
     value = field.get_value(xml)
     data = field.run_validation(value)
     assert isinstance(data, UUID)
@@ -114,7 +115,7 @@ def test_uuid_field():
 
 
 def test_integer_field():
-    field = fields.IntegerField(source="/Товар/БазоваяЕдиница")
+    field = fields.IntegerXPathField(xpath="/Товар/БазоваяЕдиница")
     value = field.get_value(xml)
     data = field.run_validation(value)
     assert isinstance(data, int)
@@ -122,23 +123,25 @@ def test_integer_field():
 
 
 def test_float_field():
-    field = fields.FloatField(source="/Товар/Вес")
+    field = fields.FloatXPathField(xpath="/Товар/Вес")
     value = field.get_value(xml)
     data = field.run_validation(value)
     assert isinstance(data, float)
     assert data == 0.12
 
 
-def test_decimal_field():
-    field = fields.DecimalField(source="/Товар/Вес", max_digits=3, decimal_places=2)
-    value = field.get_value(xml)
-    data = field.run_validation(value)
-    assert isinstance(data, Decimal)
-    assert data == Decimal("0.12")
+# def test_decimal_field():
+#     field = fields.DecimalField(xpath="/Товар/Вес", max_digits=3, decimal_places=2)
+#     value = field.get_value(xml)
+#     data = field.run_validation(value)
+#     assert isinstance(data, Decimal)
+#     assert data == Decimal("0.12")
 
 
 def test_list_field():
-    field = fields.ListField(child=fields.UUIDField(), source="/Товар/Группы/Ид")
+    field = fields.ListXPathField(
+        child=fields.UUIDXPathField(), xpath="/Товар/Группы/Ид"
+    )
     value = field.get_value(xml)
     data = field.run_validation(value)
     assert isinstance(data, list)

@@ -72,19 +72,19 @@ xml2 = lxml.objectify.fromstring(
 
 
 def test_serializer_get_value():
-    serializer = serializers.Serializer(source="/Товар")
+    serializer = serializers.XPathSerializer(xpath="/Товар")
     value = serializer.get_value(xml)
     assert isinstance(value, lxml.objectify.ObjectifiedElement)
 
 
 def test_serializer():
-    class ProductSerializer(serializers.Serializer):
-        uuid = serializers.UUIDField(source="Ид")
-        group_uuids = serializers.ListField(
-            child=serializers.UUIDField(), source="Группы/Ид"
+    class ProductSerializer(serializers.XPathSerializer):
+        uuid = serializers.UUIDXPathField(xpath="Ид")
+        group_uuids = serializers.ListXPathField(
+            child=serializers.UUIDXPathField(), xpath="Группы/Ид"
         )
 
-    serializer = ProductSerializer(source="/Товар", data=xml)
+    serializer = ProductSerializer(xpath="/Товар", data=xml)
     serializer.is_valid()
     assert serializer.validated_data == {
         "uuid": UUID("a9104793-9174-11eb-972c-38607706b20d"),
@@ -93,12 +93,12 @@ def test_serializer():
 
 
 def test_serializer_many():
-    class PriceSerializer(serializers.Serializer):
-        value = serializers.IntegerField(source="ЦенаЗаЕдиницу")
+    class PriceSerializer(serializers.XPathSerializer):
+        value = serializers.IntegerXPathField(xpath="ЦенаЗаЕдиницу")
 
-    class RootSerializer(serializers.Serializer):
+    class RootSerializer(serializers.XPathSerializer):
         prices = PriceSerializer(
-            source="/КоммерческаяИнформация/Предложение/Цены/Цена", many=True
+            xpath="/КоммерческаяИнформация/Предложение/Цены/Цена", many=True
         )
 
     serializer = RootSerializer(data=xml2)
@@ -135,13 +135,13 @@ xml3 = lxml.objectify.fromstring(
 def test_serializer_with_namespace():
     ns = {"p": "urn:1C.ru:commerceml_2"}
 
-    class ProductSerializer(serializers.Serializer):
-        uuid = serializers.UUIDField(source="p:Ид", namespaces=ns)
-        group_uuids = serializers.ListField(
-            child=serializers.UUIDField(), source="p:Группы/p:Ид", namespaces=ns
+    class ProductSerializer(serializers.XPathSerializer):
+        uuid = serializers.UUIDXPathField(xpath="p:Ид", namespaces=ns)
+        group_uuids = serializers.ListXPathField(
+            child=serializers.UUIDXPathField(), xpath="p:Группы/p:Ид", namespaces=ns
         )
 
-    serializer = ProductSerializer(source="/p:Товар", data=xml3, namespaces=ns)
+    serializer = ProductSerializer(xpath="/p:Товар", data=xml3, namespaces=ns)
     serializer.is_valid()
     assert serializer.validated_data == {
         "uuid": UUID("a9104793-9174-11eb-972c-38607706b20d"),
