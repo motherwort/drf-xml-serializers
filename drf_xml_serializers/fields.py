@@ -73,6 +73,10 @@ class FloatXPathField(drf_fields.FloatField, XPathField):
     pass
 
 
+class DecimalXPathField(drf_fields.DecimalField, XPathField):
+    pass
+
+
 class _UnvalidatedField(drf_fields._UnvalidatedField, XPathField):
     pass
 

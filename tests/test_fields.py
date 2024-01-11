@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import UUID
 
 import lxml.objectify
@@ -130,12 +131,12 @@ def test_float_field():
     assert data == 0.12
 
 
-# def test_decimal_field():
-#     field = fields.DecimalField(xpath="/Товар/Вес", max_digits=3, decimal_places=2)
-#     value = field.get_value(xml)
-#     data = field.run_validation(value)
-#     assert isinstance(data, Decimal)
-#     assert data == Decimal("0.12")
+def test_decimal_field():
+    field = fields.DecimalXPathField(xpath="/Товар/Вес", max_digits=3, decimal_places=2)
+    value = field.get_value(xml)
+    data = field.run_validation(value)
+    assert isinstance(data, Decimal)
+    assert data == Decimal("0.12")
 
 
 def test_list_field():
