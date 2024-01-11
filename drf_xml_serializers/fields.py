@@ -4,6 +4,31 @@ from rest_framework.fields import ValidationError  # noqa
 from rest_framework.fields import empty
 
 
+def to_python(value: lxml.objectify.ObjectifiedDataElement):
+    # order matters
+    if isinstance(value, lxml.objectify.StringElement):
+        return str(value)
+    if isinstance(value, lxml.objectify.BoolElement):
+        return bool(value)
+    if isinstance(value, lxml.objectify.FloatElement):
+        return float(value)
+    if isinstance(value, lxml.objectify.NumberElement):
+        return int(value)
+    return value
+
+
+def get_xpath_values(
+    *,
+    element: lxml.objectify.ObjectifiedElement,
+    xpath: str,
+    namespaces: dict | None = None
+):
+    values = element.xpath(xpath, namespaces=namespaces)
+    if not values:
+        return values
+    return list(map(to_python, values))
+
+
 class XPathField(drf_fields.Field):
     default_error_messages = {
         "got_many": "Expected one value, got many",
@@ -18,8 +43,8 @@ class XPathField(drf_fields.Field):
 
     def get_value(self, element: lxml.objectify.ObjectifiedElement):
         assert self.xpath is not None
-        values: list[lxml.objectify.ObjectifiedElement] | None = element.xpath(
-            self.xpath, namespaces=self.namespaces
+        values = get_xpath_values(
+            element=element, xpath=self.xpath, namespaces=self.namespaces
         )
         if not values:
             return empty
@@ -33,19 +58,11 @@ class BooleanXPathField(drf_fields.BooleanField, XPathField):
 
 
 class CharXPathField(drf_fields.CharField, XPathField):
-    def to_internal_value(self, data):
-        if isinstance(data, lxml.objectify.StringElement):
-            data = str(data)
-        return super().to_internal_value(data)
+    pass
 
 
 class UUIDXPathField(drf_fields.UUIDField, XPathField):
-    def to_internal_value(self, data):
-        if isinstance(data, lxml.objectify.StringElement):
-            data = str(data)
-        if isinstance(data, lxml.objectify.IntElement):
-            data = int(data)
-        return super().to_internal_value(data)
+    pass
 
 
 class IntegerXPathField(drf_fields.IntegerField, XPathField):
@@ -64,7 +81,6 @@ class ListXPathField(drf_fields.ListField, XPathField):
     child = _UnvalidatedField()
 
     def get_value(self, element: lxml.objectify.ObjectifiedElement):
-        values: list[lxml.objectify.ObjectifiedElement] | None = element.xpath(
-            self.xpath, namespaces=self.namespaces
+        return get_xpath_values(
+            element=element, xpath=self.xpath, namespaces=self.namespaces
         )
-        return values
